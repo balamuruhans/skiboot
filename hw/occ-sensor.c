@@ -491,6 +491,7 @@ bool occ_sensors_init(void)
 	struct dt_node *sg, *exports;
 	int occ_num = 0, i;
 	bool has_gpu = false;
+	bool has_sensor = false;
 
 	/* OCC inband sensors is only supported in P9 */
 	if (proc_gen != proc_gen_p9)
@@ -526,7 +527,10 @@ bool occ_sensors_init(void)
 		md = get_names_block(hb);
 
 		/* Sanity check of the Sensor Data Header Block */
-		if (!occ_sensor_sanity(hb, chip->id))
+		if (occ_sensor_sanity(hb, chip->id))
+			/* Flag to ensure sensor exist*/
+			has_sensor = true;
+		else
 			continue;
 
 		phandles = malloc(hb->nr_sensors * sizeof(u32));
@@ -586,6 +590,10 @@ bool occ_sensors_init(void)
 		occ_add_sensor_groups(sg, phandles, ptype, phcount, chip->id);
 		free(phandles);
 		free(ptype);
+	}
+	if (!has_sensor) {
+		/* clear the device tree property for sensors */
+               dt_free(sg);
 	}
 
 	if (!occ_num)
