@@ -399,7 +399,7 @@ static bool wait_for_all_occ_init(void)
  * element in the pstate table.
  */
 static void parse_pstates_v2(struct occ_pstate_table *data, u32 *dt_id,
-			     u32 *dt_freq, int nr_pstates, int pmax, int pmin)
+			     u32 *dt_freq, int nr_pstates, int pmax)
 {
 	int i, j;
 
@@ -411,7 +411,7 @@ static void parse_pstates_v2(struct occ_pstate_table *data, u32 *dt_id,
 		dt_freq[j] = data->v2.pstates[i].freq_khz / 1000;
 		j++;
 
-		if (data->v2.pstates[i].id == pmin)
+		if (data->v2.pstates[i].id == pmax)
 			break;
 	}
 
@@ -637,7 +637,7 @@ static bool add_cpu_pstate_properties(struct dt_node *power_mgt,
 	switch (major) {
 	case 0:
 		parse_pstates_v2(occ_data, dt_id, dt_freq, nr_pstates,
-				 pmax, pmin);
+				 pmax);
 		break;
 	case 0x9:
 		parse_pstates_v9(occ_data, dt_id, dt_freq, nr_pstates,
